@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+{% block content %}
+<h3>Generate Salary</h3>
+<form method="post">
+    <p>Select Employee:
+        <select name="employee_id">
+            {% for emp in employees %}
+            <option value="{{ emp.id }}">{{ emp.name }}</option>
+            {% endfor %}
+        </select>
+    </p>
+    <p>Bonus: <input type="number" step="0.01" name="bonus"></p>
+    <p>Deductions: <input type="number" step="0.01" name="deductions"></p>
+    <p><input type="submit" value="Generate"></p>
+</form>
+{% endblock %}

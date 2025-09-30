@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+{% block content %}
+<h3>Salary Records</h3>
+<table border="1">
+    <tr><th>ID</th><th>Employee</th><th>Date</th><th>Bonus</th><th>Deductions</th><th>Net Salary</th></tr>
+    {% for sal in salaries %}
+    <tr>
+        <td>{{ sal.id }}</td><td>{{ sal.employee.name }}</td><td>{{ sal.date }}</td>
+        <td>{{ sal.bonus }}</td><td>{{ sal.deductions }}</td><td>{{ sal.net_salary }}</td>
+    </tr>
+    {% endfor %}
+</table>
+{% endblock %}

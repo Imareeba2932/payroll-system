@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+{% block content %}
+<h3>All Employees</h3>
+<table border="1">
+    <tr><th>ID</th><th>Name</th><th>Department</th><th>Role</th><th>Joining Date</th><th>Basic Salary</th></tr>
+    {% for emp in employees %}
+    <tr>
+        <td>{{ emp.id }}</td><td>{{ emp.name }}</td><td>{{ emp.department }}</td>
+        <td>{{ emp.role }}</td><td>{{ emp.joining_date }}</td><td>{{ emp.basic_salary }}</td>
+    </tr>
+    {% endfor %}
+</table>
+{% endblock %}
