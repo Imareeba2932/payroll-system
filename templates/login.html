@@ -1,10 +1,213 @@
-{% extends 'base.html' %}
-{% block content %}
-<form method="post">
-    <h3>Admin Login</h3>
-    <p><input type="text" name="username" placeholder="Username"></p>
-    <p><input type="password" name="password" placeholder="Password"></p>
-    <p><input type="submit" value="Login"></p>
-    {% if error %}<p style="color:red">{{ error }}</p>{% endif %}
-</form>
-{% endblock %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Login — PayrollPro</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+    --bg: #f4f7fd;
+    --primary: #0b6efd;
+    --accent: #0654c0;
+    --muted: #555;
+    --radius: 16px;
+    --shadow: 0 20px 40px rgba(0,0,0,0.1);
+}
+
+/* Reset */
+* { box-sizing: border-box; margin:0; padding:0; }
+body { font-family: 'Inter', sans-serif; background: var(--bg); color: #333; }
+
+/* Split Layout */
+.container { display: flex; min-height: 100vh; }
+
+/* Left Side - Login Form */
+.left-side {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 40px 20px;
+}
+
+/* Modern Glass Login Card */
+.login-card {
+    position: relative;
+    background: rgba(255,255,255,0.15);
+    backdrop-filter: blur(12px);
+    padding: 40px 32px;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    width: 100%;
+    max-width: 400px;
+    transition: transform 0.3s, box-shadow 0.3s;
+    overflow: hidden;
+}
+.login-card::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: -50%;
+    width: 200%;
+    height: 4px;
+    background: linear-gradient(90deg, var(--primary), var(--accent));
+    border-radius: 4px;
+    animation: slide 3s linear infinite;
+}
+@keyframes slide {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+}
+
+.login-card:hover { transform: translateY(-3px); }
+
+/* Title */
+.login-card h2 {
+    text-align: center;
+    margin-bottom: 2rem;
+    font-size: 2rem;
+    color: var(--primary);
+}
+
+/* Form Styles */
+.form-group { margin-bottom: 1.5rem; position: relative; }
+.form-group label { display: block; margin-bottom: 0.5rem; font-weight: 500; color: var(--muted); }
+.form-group input {
+    width: 100%;
+    padding: 0.75rem 1rem 0.75rem 2.5rem;
+    border-radius: 12px;
+    border: 1px solid rgba(255,255,255,0.3);
+    background: rgba(255,255,255,0.1);
+    color: #fff;
+    font-size: 1rem;
+    transition: 0.3s;
+}
+.form-group input::placeholder { color: rgba(255,255,255,0.7); }
+.form-group input:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 12px rgba(11,110,253,0.5);
+}
+
+/* Input Icons */
+.form-group::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 12px;
+    transform: translateY(-50%);
+    width: 18px;
+    height: 18px;
+    background-size: cover;
+}
+.form-group:nth-child(1)::before {
+    background-image: url('https://img.icons8.com/ios-filled/50/ffffff/user.png');
+    margin-top : 13px;
+    
+}
+.form-group:nth-child(2)::before {
+    background-image: url('https://img.icons8.com/ios-filled/50/ffffff/lock-2.png');
+    margin-top : 13px;
+}
+
+/* Buttons */
+.btn-primary {
+    width: 100%;
+    padding: 0.85rem;
+    background: linear-gradient(90deg, var(--primary), var(--accent));
+    color: #fff;
+    border: none;
+    border-radius: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: 0.3s;
+}
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 30px rgba(11,110,253,0.4);
+}
+
+/* Error Message */
+.error-msg {
+    color: #ff6b6b;
+    text-align: center;
+    margin-top: 0.5rem;
+    font-size: 0.9rem;
+}
+
+/* Right Side - Image */
+.right-side {
+    flex: 1.5;
+    background: url('https://www.holbrookmanter.com/wp-content/uploads/2020/09/payroll-scaled.jpg') no-repeat center center;
+    background-size: cover;
+    position: relative;
+}
+.right-side::after {
+    content: "";
+    position: absolute;
+    top:0; left:0;
+    width:100%; height:100%;
+    background: rgba(11,110,253,0.3);
+}
+/* Dashboard Button */
+.btn-dashboard {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    padding: 0.65rem 1.2rem;
+    background-color: var(--primary);
+    color: #fff;
+    text-decoration: none;
+    font-weight: 600;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    transition: 0.3s;
+    z-index: 10;
+}
+.btn-dashboard:hover {
+    background-color: var(--accent);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+}
+
+/* Responsive */
+@media(max-width:900px) {
+    .container { flex-direction: column; }
+    .right-side { flex: 0; height: 250px; }
+    .login-card::before { display: none; }
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+    <!-- Left Side: Login Form -->
+    <div class="left-side">
+        <div class="login-card">
+            <h2>Admin Login</h2>
+            <form method="POST">
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <input type="text" id="username" name="username" placeholder="Enter your username" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" placeholder="Enter your password" required>
+                </div>
+                <button type="submit" class="btn-primary">Login</button>
+                <p class="error-msg">{{ error }}</p>
+            </form>
+        </div>
+    </div>
+
+    <!-- Right Side: Full Screen Image -->
+    <div class="right-side">
+        <a href="{{ url_for('dashboard') }}" class="btn-dashboard">Dashboard</a>
+    </div>
+
+</div>
+
+</body>
+</html>

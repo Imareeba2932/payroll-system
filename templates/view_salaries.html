@@ -1,13 +1,190 @@
-{% extends 'base.html' %}
-{% block content %}
-<h3>Salary Records</h3>
-<table border="1">
-    <tr><th>ID</th><th>Employee</th><th>Date</th><th>Bonus</th><th>Deductions</th><th>Net Salary</th></tr>
-    {% for sal in salaries %}
-    <tr>
-        <td>{{ sal.id }}</td><td>{{ sal.employee.name }}</td><td>{{ sal.date }}</td>
-        <td>{{ sal.bonus }}</td><td>{{ sal.deductions }}</td><td>{{ sal.net_salary }}</td>
-    </tr>
-    {% endfor %}
-</table>
-{% endblock %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Salary Records — PayrollPro</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+    
+:root {
+    --bg: #f4f7fd;
+    --card-bg: #ffffff;
+    --muted: #555;
+    --primary: darkblue;
+    --accent: darkblue;
+    --radius: 14px;
+    --shadow: 0 12px 30px rgba(0,0,0,0.08);
+}
+
+/* Reset */
+* { box-sizing: border-box; margin:0; padding:0; }
+body {
+    font-family: 'Inter', sans-serif;
+    background: var(--bg);
+    color: #333;
+}
+
+/* Header */
+header {
+    background: var(--card-bg);
+    padding: 16px 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 3px 12px rgba(0,0,0,0.06);
+}
+header .brand {
+    font-weight: 800;
+    font-size: 1.5rem;
+    color: var(--primary);
+    text-decoration: none;
+}
+header .nav-links a {
+    margin-left: 12px;
+    text-decoration: none;
+    font-weight: 500;
+    padding: 8px 14px;
+    border-radius: 8px;
+    transition: 0.3s;
+    color: var(--muted);
+}
+header .nav-links a:hover {
+    background: var(--primary);
+    color: #fff;
+}
+
+/* Page Wrapper */
+main {
+    max-width: 1200px;
+    margin: 32px auto;
+    padding: 0 20px;
+}
+
+/* Table Card */
+.table-section {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+.table-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.table-actions h2 {
+    font-size: 1.6rem;
+    color: var(--primary);
+}
+.table-actions .btn-primary {
+    background: linear-gradient(90deg, var(--primary), var(--accent));
+    padding: 10px 18px;
+    border-radius: 12px;
+    color: #fff;
+    font-weight: 600;
+    text-decoration: none;
+    transition: 0.3s;
+}
+.table-actions .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(11,110,253,0.3);
+}
+
+/* Table Styles */
+.table-card {
+    background: var(--card-bg);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    overflow-x: auto;
+    padding: 20px;
+}
+.responsive-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.95rem;
+}
+.responsive-table thead tr {
+    background: var(--primary);
+    color: #fff;
+}
+.responsive-table th, .responsive-table td {
+    padding: 12px 15px;
+    text-align: left;
+}
+.responsive-table tbody tr:nth-child(even) {
+    background: #f9f9f9;
+}
+.responsive-table tbody tr:hover {
+    background: var(--accent);
+    color: #fff;
+    transform: scale(1.01);
+}
+
+/* Responsive */
+@media(max-width:800px) {
+    .table-actions {
+        flex-direction: column;
+        gap: 12px;
+    }
+    .responsive-table th, .responsive-table td {
+        padding: 10px;
+    }
+}
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<header>
+    <a class="brand" href="#">PayrollPro</a>
+    <div class="nav-links">
+        <a href="{{ url_for('dashboard') }}">Dashboard</a>
+        <a href="{{ url_for('view_employees') }}">Employees</a>
+        <a href="{{ url_for('view_salaries') }}">Payroll</a>
+        <a href="{{ url_for('logout') }}">Logout</a>
+    </div>
+</header>
+
+<!-- Main -->
+<main>
+    <section class="table-section">
+        <div class="table-actions">
+            <h2>Salary Records</h2>
+            <a class="btn-primary" href="{{ url_for('generate_salary') }}">Generate New</a>
+        </div>
+        <div class="table-card">
+            <table class="responsive-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Employee</th>
+                        <th>Date</th>
+                        <th>Bonus</th>
+                        <th>Deductions</th>
+                        <th>Net Salary</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for sal in salaries %}
+                    <tr>
+                        <td>{{ sal.id }}</td>
+                        <td>{{ sal.employee.name }}</td>
+                        <td>{{ sal.date }}</td>
+                        <td>{{ "{:.2f}".format(sal.bonus) }}</td>
+                        <td>{{ "{:.2f}".format(sal.deductions) }}</td>
+                        <td>{{ "{:.2f}".format(sal.net_salary) }}</td>
+                    </tr>
+                    {% endfor %}
+                    {% if salaries|length == 0 %}
+                    <tr>
+                        <td colspan="6" style="text-align:center; color:var(--muted)">No salary records found.</td>
+                    </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+</main>
+
+</body>
+</html>

@@ -1,11 +1,17 @@
 from flask import Flask, render_template, request, redirect, url_for, session
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
+import calendar
 
 app = Flask(__name__)
 app.secret_key = 'secret'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///payroll.db'
 db = SQLAlchemy(app)
+
+# inject current year into templates
+@app.context_processor
+def inject_current_year():
+    return { 'current_year': datetime.now().year }
 
 # Models
 class Employee(db.Model):
@@ -43,7 +49,71 @@ def login():
 def dashboard():
     if 'admin' not in session:
         return redirect(url_for('login'))
-    return render_template('dashboard.html')
+    # compute simple stats for dashboard
+    total_employees = Employee.query.count()
+    total_payrolls = Salary.query.count()
+
+    # total amount paid
+    total_paid = 0.0
+    for s in Salary.query.all():
+        try:
+            total_paid += float(s.net_salary or 0)
+        except Exception:
+            pass
+
+    # recent employees
+    recent_employees = Employee.query.order_by(Employee.id.desc()).limit(5).all()
+
+    # build last 6 months payroll totals
+    def last_n_months(n=6):
+        now = datetime.now()
+        months = []
+        y = now.year
+        m = now.month
+        for _ in range(n):
+            months.append((y, m))
+            m -= 1
+            if m == 0:
+                m = 12
+                y -= 1
+        months.reverse()
+        return months
+
+    months = last_n_months(6)
+    month_labels = [f"{calendar.month_abbr[m]} {y}" for (y, m) in months]
+    month_map = {(y, m): 0.0 for (y, m) in months}
+    for s in Salary.query.all():
+        try:
+            parts = s.date.split('-')
+            y = int(parts[0]); m = int(parts[1])
+            if (y, m) in month_map:
+                month_map[(y, m)] += float(s.net_salary or 0)
+        except Exception:
+            continue
+
+    month_values = [round(month_map[(y, m)], 2) for (y, m) in months]
+    max_month_value = max(month_values) if month_values and max(month_values) > 0 else 1
+    # prepare chart data as dicts with preformatted values and height percent to avoid Jinja math
+    chart_data = []
+    for label, value in zip(month_labels, month_values):
+        try:
+            h = int((value / max_month_value) * 100) if max_month_value else 0
+        except Exception:
+            h = 0
+        chart_data.append({
+            'label': label,
+            'value': value,
+            'formatted': "${:.2f}".format(value),
+            'h': h
+        })
+
+    stats = {
+        'total_employees': total_employees,
+        'total_payrolls': total_payrolls,
+        'total_paid': round(total_paid, 2)
+    }
+
+    return render_template('dashboard.html', stats=stats, chart_labels=month_labels, chart_values=month_values, chart_data=chart_data, max_month_value=max_month_value, recent_employees=recent_employees)
 
 @app.route('/add-employee', methods=['GET', 'POST'])
 def add_employee():

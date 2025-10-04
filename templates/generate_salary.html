@@ -1,16 +1,233 @@
-{% extends 'base.html' %}
-{% block content %}
-<h3>Generate Salary</h3>
-<form method="post">
-    <p>Select Employee:
-        <select name="employee_id">
-            {% for emp in employees %}
-            <option value="{{ emp.id }}">{{ emp.name }}</option>
-            {% endfor %}
-        </select>
-    </p>
-    <p>Bonus: <input type="number" step="0.01" name="bonus"></p>
-    <p>Deductions: <input type="number" step="0.01" name="deductions"></p>
-    <p><input type="submit" value="Generate"></p>
-</form>
-{% endblock %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Generate Salary — PayrollPro</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+    --bg:#fdfcf6;
+    --card-bg:#ffffff;
+    --muted:#555;
+    --primary:darkblue;
+    --accent:darkblue;
+    --radius:16px;
+    --shadow:0 12px 30px rgba(0,0,0,0.08);
+}
+
+/* Reset */
+*{box-sizing:border-box;}
+body{
+    margin:0;
+    font-family:'Inter',sans-serif;
+    background: var(--bg);
+    color: #333;
+}
+
+/* Header */
+header{
+    background: var(--card-bg);
+    padding:16px 24px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    box-shadow:0 3px 12px rgba(0,0,0,0.06);
+    border-bottom:1px solid rgba(0,0,0,0.05);
+}
+.brand{
+    font-weight:800;
+    font-size:1.5rem;
+    color: var(--primary);
+    text-decoration:none;
+}
+.nav-links a{
+    margin-left:12px;
+    text-decoration:none;
+    font-weight:500;
+    padding:8px 14px;
+    border-radius:10px;
+    transition:0.3s;
+    color: #555;
+}
+.nav-links a:hover{
+    background: var(--primary);
+    color:#fff;
+}
+
+/* Main Layout */
+main{
+    display:flex;
+    max-width:1200px;
+    margin:40px auto;
+    padding:0 20px;
+    gap:40px;
+}
+
+/* Left Image */
+.left-image{
+    flex:1;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+}
+.left-image img{
+    width:100%;
+    max-width:450px;
+    /* border-radius: var(--radius);
+    box-shadow: var(--shadow); */
+}
+
+/* Right Form */
+.right-form{
+    flex:1;
+    display:flex;
+    align-items:center;
+}
+.form-card{
+    background: var(--card-bg);
+    padding:32px;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    width:100%;
+    max-width:450px;
+    transition: transform 0.3s;
+}
+.form-card:hover{
+    transform: translateY(-3px);
+}
+.form-card h2{
+    margin-top:0;
+    margin-bottom:24px;
+    font-size:1.6rem;
+    color: var(--primary);
+    text-align:center;
+}
+
+/* Form Styles */
+.grid-form{
+    display:flex;
+    flex-direction:column;
+    gap:16px;
+}
+.form-label{
+    display:flex;
+    flex-direction:column;
+    font-weight:500;
+    color:var(--muted);
+}
+.form-input{
+    margin-top:6px;
+    padding:10px 14px;
+    border-radius:10px;
+    border:1px solid #ccc;
+    background: rgba(255,255,255,0.9);
+    color:#333;
+    font-size:1rem;
+    transition:0.3s;
+}
+.form-input:focus{
+    outline:none;
+    border-color: var(--primary);
+    box-shadow: 0 0 8px var(--accent);
+}
+
+/* Form Actions */
+.form-actions{
+    display:flex;
+    justify-content:flex-end;
+    gap:12px;
+    margin-top:16px;
+}
+.btn-primary{
+    background: linear-gradient(90deg,var(--primary),var(--accent));
+    color:#333;
+    padding:10px 20px;
+    border:none;
+    border-radius:12px;
+    cursor:pointer;
+    font-weight:600;
+    transition:0.3s;
+}
+.btn-primary:hover{
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(255,204,0,0.3);
+}
+.btn-outline{
+    padding:10px 20px;
+    border-radius:12px;
+    border:1px solid var(--muted);
+    color: var(--muted);
+    text-decoration:none;
+    font-weight:500;
+    transition:0.3s;
+}
+.btn-outline:hover{
+    background: rgba(255,204,0,0.1);
+    color: var(--primary);
+}
+
+/* Responsive */
+@media(max-width:900px){
+    main{
+        flex-direction:column;
+        align-items:center;
+    }
+    .left-image, .right-form{
+        width:100%;
+    }
+    .left-image img{
+        max-width:80%;
+    }
+}
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<header>
+    <a class="brand" href="#">PayrollPro</a>
+    <div class="nav-links">
+        <a href="{{ url_for('dashboard') }}">Dashboard</a>
+        <a href="{{ url_for('view_employees') }}">Employees</a>
+        <a href="{{ url_for('view_salaries') }}">Payroll</a>
+        <a href="{{ url_for('logout') }}">Logout</a>
+    </div>
+</header>
+
+<!-- Main Section -->
+<main>
+    <!-- Left Image -->
+    <div class="left-image">
+        <img src="https://mspinnacle.com/wp-content/uploads/2020/03/Payroll-Illustration-v2@72x-1024x824.png" alt="Payroll Illustration">
+    </div>
+
+    <!-- Right Form -->
+    <div class="right-form">
+        <div class="form-card">
+            <h2>Generate Salary</h2>
+            <form method="post" class="grid-form">
+                <label class="form-label">Employee
+                    <select class="form-input" name="employee_id" required>
+                        {% for emp in employees %}
+                        <option value="{{ emp.id }}">{{ emp.name }}</option>
+                        {% endfor %}
+                    </select>
+                </label>
+                <label class="form-label">Bonus
+                    <input class="form-input" type="number" step="0.01" name="bonus" value="0">
+                </label>
+                <label class="form-label">Deductions
+                    <input class="form-input" type="number" step="0.01" name="deductions" value="0">
+                </label>
+                <div class="form-actions">
+                    <button class="btn-primary" type="submit">Generate</button>
+                    <a class="btn-outline" href="{{ url_for('view_salaries') }}">View Salaries</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</main>
+
+</body>
+</html>
