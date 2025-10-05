@@ -67,28 +67,32 @@ body { font-family: 'Inter', sans-serif; background: var(--bg); color: #333; }
     text-align: center;
     margin-bottom: 2rem;
     font-size: 2rem;
-    color: var(--primary);
+    color: #0b6efd;
 }
 
 /* Form Styles */
 .form-group { margin-bottom: 1.5rem; position: relative; }
-.form-group label { display: block; margin-bottom: 0.5rem; font-weight: 500; color: var(--muted); }
+.form-group label { display: block; margin-bottom: 0.5rem; font-weight: 600; color: #1f2937; }
 .form-group input {
     width: 100%;
     padding: 0.75rem 1rem 0.75rem 2.5rem;
     border-radius: 12px;
-    border: 1px solid rgba(255,255,255,0.3);
-    background: rgba(255,255,255,0.1);
-    color: #fff;
+    border: 1px solid #d0d7e2;
+    background: #ffffff;
+    color: #1f2937;
     font-size: 1rem;
-    transition: 0.3s;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
 }
-.form-group input::placeholder { color: rgba(255,255,255,0.7); }
+.form-group input::placeholder { color: #6b7280; }
 .form-group input:focus {
     outline: none;
-    border-color: var(--primary);
-    box-shadow: 0 0 12px rgba(11,110,253,0.5);
+    border-color: #0b6efd;
+    box-shadow: 0 0 0 4px rgba(11,110,253,0.15);
+    background: #ffffff;
 }
+.form-group input:-webkit-autofill,
+.form-group input:-webkit-autofill:hover,
+.form-group input:-webkit-autofill:focus { -webkit-text-fill-color: #1f2937; -webkit-box-shadow: 0 0 0px 1000px #ffffff inset; box-shadow: 0 0 0px 1000px #ffffff inset; }
 
 /* Input Icons */
 .form-group::before {
@@ -102,12 +106,11 @@ body { font-family: 'Inter', sans-serif; background: var(--bg); color: #333; }
     background-size: cover;
 }
 .form-group:nth-child(1)::before {
-    background-image: url('https://img.icons8.com/ios-filled/50/ffffff/user.png');
+    background-image: url('https://img.icons8.com/ios-filled/50/000000/user.png');
     margin-top : 13px;
-    
 }
 .form-group:nth-child(2)::before {
-    background-image: url('https://img.icons8.com/ios-filled/50/ffffff/lock-2.png');
+    background-image: url('https://img.icons8.com/ios-filled/50/000000/lock-2.png');
     margin-top : 13px;
 }
 
@@ -198,7 +201,7 @@ body { font-family: 'Inter', sans-serif; background: var(--bg); color: #333; }
                 </div>
                 <button type="submit" class="btn-primary">Login</button>
                 <p class="error-msg">{{ error }}</p>
-                <p style="text-align:center;margin-top:10px;color:#fff;">No account? <a href="{{ url_for('register') }}" style="color:#ffd700; text-decoration:none;">Register</a></p>
+                <p style="text-align:center;margin-top:10px;color:#4b5563;">No account? <a href="{{ url_for('register') }}" style="color:#0b6efd; text-decoration:none;">Register</a></p>
             </form>
         </div>
     </div>
