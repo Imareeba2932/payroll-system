@@ -186,7 +186,7 @@ body { font-family: 'Inter', sans-serif; background: var(--bg); color: #333; }
     <!-- Left Side: Login Form -->
     <div class="left-side">
         <div class="login-card">
-            <h2>Admin Login</h2>
+            <h2>Login</h2>
             <form method="POST">
                 <div class="form-group">
                     <label for="username">Username</label>
@@ -198,6 +198,7 @@ body { font-family: 'Inter', sans-serif; background: var(--bg); color: #333; }
                 </div>
                 <button type="submit" class="btn-primary">Login</button>
                 <p class="error-msg">{{ error }}</p>
+                <p style="text-align:center;margin-top:10px;color:#fff;">No account? <a href="{{ url_for('register') }}" style="color:#ffd700; text-decoration:none;">Register</a></p>
             </form>
         </div>
     </div>

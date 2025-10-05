@@ -1,6 +1,8 @@
 from flask import Flask, render_template, request, redirect, url_for, session
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
+from werkzeug.security import generate_password_hash, check_password_hash
+import re
 import calendar
 
 app = Flask(__name__)
@@ -14,6 +16,13 @@ def inject_current_year():
     return { 'current_year': datetime.now().year }
 
 # Models
+class User(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(80), unique=True, nullable=False)
+    email = db.Column(db.String(120), unique=True, nullable=False)
+    password_hash = db.Column(db.String(255), nullable=False)
+    is_admin = db.Column(db.Boolean, default=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
 class Employee(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100))
@@ -33,21 +42,78 @@ class Salary(db.Model):
 
 @app.route('/')
 def home():
-    return redirect(url_for('login'))
+    return render_template('landing.html')
+
+@app.route('/landing')
+def landing():
+    return render_template('landing.html')
+
+def _validate_email(email: str) -> bool:
+    return re.match(r"^[^@\s]+@[^@\s]+\.[^@\s]+$", email or '') is not None
+
+def _validate_password_strength(password: str) -> bool:
+    if not password or len(password) < 8:
+        return False
+    has_letter = re.search(r"[A-Za-z]", password) is not None
+    has_number = re.search(r"[0-9]", password) is not None
+    return has_letter and has_number
+
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+    errors = []
+    if request.method == 'POST':
+        username = (request.form.get('username') or '').strip()
+        email = (request.form.get('email') or '').strip().lower()
+        password = request.form.get('password') or ''
+        confirm_password = request.form.get('confirm_password') or ''
+
+        if len(username) < 3 or not re.match(r"^[A-Za-z0-9_]+$", username):
+            errors.append('Username must be at least 3 characters and alphanumeric with underscores only.')
+        if not _validate_email(email):
+            errors.append('Enter a valid email address.')
+        if not _validate_password_strength(password):
+            errors.append('Password must be at least 8 characters and include letters and numbers.')
+        if password != confirm_password:
+            errors.append('Passwords do not match.')
+        if User.query.filter_by(username=username).first():
+            errors.append('Username is already taken.')
+        if User.query.filter_by(email=email).first():
+            errors.append('Email is already registered.')
+
+        if not errors:
+            user = User(
+                username=username,
+                email=email,
+                password_hash=generate_password_hash(password),
+                is_admin=False
+            )
+            db.session.add(user)
+            db.session.commit()
+            session['user_id'] = user.id
+            session['is_admin'] = user.is_admin
+            return redirect(url_for('dashboard'))
+
+    return render_template('register.html', errors=errors)
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
+    error = ''
     if request.method == 'POST':
-        if request.form['username'] == 'admin' and request.form['password'] == 'admin':
-            session['admin'] = True
+        username = (request.form.get('username') or '').strip()
+        password = request.form.get('password') or ''
+
+        user = User.query.filter_by(username=username).first()
+        if user and check_password_hash(user.password_hash, password):
+            session['user_id'] = user.id
+            session['is_admin'] = user.is_admin
             return redirect(url_for('dashboard'))
         else:
-            return render_template('login.html', error='Invalid Credentials')
-    return render_template('login.html')
+            error = 'Invalid username or password'
+    return render_template('login.html', error=error)
 
 @app.route('/dashboard')
 def dashboard():
-    if 'admin' not in session:
+    if not session.get('user_id'):
         return redirect(url_for('login'))
     # compute simple stats for dashboard
     total_employees = Employee.query.count()
@@ -117,7 +183,7 @@ def dashboard():
 
 @app.route('/add-employee', methods=['GET', 'POST'])
 def add_employee():
-    if 'admin' not in session:
+    if not session.get('user_id'):
         return redirect(url_for('login'))
     if request.method == 'POST':
         emp = Employee(
@@ -134,14 +200,14 @@ def add_employee():
 
 @app.route('/employees')
 def view_employees():
-    if 'admin' not in session:
+    if not session.get('user_id'):
         return redirect(url_for('login'))
     employees = Employee.query.all()
     return render_template('view_employees.html', employees=employees)
 
 @app.route('/generate-salary', methods=['GET', 'POST'])
 def generate_salary():
-    if 'admin' not in session:
+    if not session.get('user_id'):
         return redirect(url_for('login'))
     employees = Employee.query.all()
     if request.method == 'POST':
@@ -165,14 +231,15 @@ def generate_salary():
 
 @app.route('/salaries')
 def view_salaries():
-    if 'admin' not in session:
+    if not session.get('user_id'):
         return redirect(url_for('login'))
     salaries = Salary.query.all()
     return render_template('view_salaries.html', salaries=salaries)
 
 @app.route('/logout')
 def logout():
-    session.pop('admin', None)
+    session.pop('user_id', None)
+    session.pop('is_admin', None)
     return redirect(url_for('login'))
 
 if __name__ == '__main__':
